@@ -1,0 +1,242 @@
+﻿<!-- Created a new HTML page for Javascript functions to get all products and orders -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link href="Content/Stationery/css/owl.carousel.css" rel="stylesheet" />
+    <link href="Content/Stationery/css/responsive.css" rel="stylesheet" />
+    <link href="Content/Stationery/style.css" rel="stylesheet" />
+</head>
+<body>
+        <script type="text/javascript">
+            //Get Products - The buttons dont work
+        function GetProducts() {
+            jQuery.support.cors = true;
+            $.ajax({
+                url: "http://localhost:51630/api/Products",
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    WriteResponse(data);
+                },
+                error: function () {
+                    alert("Error contacting server");
+                }
+            });
+
+            function WriteResponse(products) {
+                //alert("Success");
+
+                var strResult = "<table><th>Product Name</th><th>Description</th><th>Product Price</th><th>Category</th>"
+                $.each(products, function (index, product) {
+                    strResult += "<tr><td>" + product.ProductName + "</td><td>" + product.Description + "</td><td>" + product.Price + "</td>< td > " + product.CategoryName + "</td ></tr> "
+                    $each(product.Orders, function (index, order) {
+                        strResult += "<tr><td>" + order.OrderDetails + "</td><td>" + order.FirstName + "<br /> "
+                    });
+                    strResult += "</td></tr>"
+                });
+                strResult += "</table>"
+                $("#divResult").html(strResult);
+            }
+
+             //Get Orders
+            function GetOrders() {
+                jQuery.support.cors = true;
+                $.ajax({
+                    url: "http://localhost:51630/api/Orders",
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        WriteResponse(data);
+                    },
+                    error: function () {
+                        alert("Error contacting server");
+                    }
+                });
+                function WriteResponse(products) {
+                    alert("Success");
+
+                    var strResult = "<table><th>Order Details</th><th>First Name</th><th>Last Name</th><th>Address</th></table>"
+                }
+
+
+                //Get All Products
+                function WriteResponse(products) {
+                    alert("Success");
+                }
+                var ViewModel = function () {
+                    var self = this;
+                    self.products = ko.observableArray();
+                    self.error = ko.observable();
+
+                    var productsUri = '/api/Products/';
+
+                    function ajaxHelper(uri, method, data) {
+                        self.error(''); // Clear error message
+                        return $.ajax({
+                            type: method,
+                            url: uri,
+                            dataType: 'json',
+                            contentType: 'application/json',
+                            data: data ? JSON.stringify(data) : null
+                        }).fail(function (jqXHR, textStatus, errorThrown) {
+                            self.error(errorThrown);
+                        });
+                    }
+
+                    function GetAllProducts() {
+                        ajaxHelper(booksUri, 'GET').done(function (data) {
+                            self.books(data);
+                        });
+                    }
+
+                    // Fetch the initial data.
+                    GetAllProducts();
+                };
+                // I tried using another method but still gives an error
+                var signin = function () {
+                    var tokenUrl = "http://localhost:50170/Token";
+                    var loginData = $("#userSignup").serialize();
+                    loginData = loginData + "&grant_type=password";
+                    $.post(tokenUrl, loginData).always(showProducts);
+                    return false;
+                };
+
+                $("#signin").click(signin);
+
+                var register = function () {
+                    var registrationUrl = "http://localhost:51630/api/Account/Register";
+                    var registrationData = $("#userSignup").serialize();
+                    $.post(registrationUrl, registrationData).always(showProducts);
+                    return false;
+                };
+
+                $("#signup").click(register);
+
+                $(function () {
+                    var productSourceUrl = "http://localhost:51630/api/Products";
+
+                    var getProducts = function () {
+                        $.get(productSourceUrl).always(showProducts);
+                        return false;
+                    };
+
+                var showProducts = function (obj) {
+                        $("#products").text(JSON.stringify(obj, null, 3));
+                    };
+
+                $("#getProducts").click(getProducts);
+                });
+                
+        </script>
+
+        <div class="site-branding-area">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="logo">
+                            <h1><a href="http://localhost:51630/">WiNiBro<span>Stationery</span></a></h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mainmenu-area">
+            <div class="container">
+                <div class="row">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                    </div>
+                    <div class="navbar-collapse collapse">
+                        <ul class="nav navbar-nav">
+                            <li><a href="http://localhost:51630/Views/Home/Index.cshtml">Home</a></li>
+                            <li><a href="http://localhost:50093/index.html">Catalogue</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <form id="userSignup">
+        <input type="text" name="username" placeholder="Name" />
+        <input type="password" name="password" placeholder="Password" />
+        <input type="password" name="confirmpassword" placeholder="Confirm password" />
+        <input type="submit" id="signup" value="Sign up" />
+        <input type="submit" id="signin" value="Sign in" />
+
+    </form>
+
+    <div style="margin-left:5px; margin-top:10px;">
+        <div>
+            <input type="button" value="GetAllProducts" onclick="GetAllProducts();">
+            <div id="divResult"></div>
+            <br />
+            <input type="button" value="GetProducts" onclick="GetProducts();">
+            <div id="divResult"></div>
+            <br />
+            <input type="button" value="GetOrders" onclick="GetOrders();">
+            <div id="divResult"></div>
+        </div>
+        <div class="page-header">
+            <h1>Products</h1>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h2 class="panel-title">Products</h2>
+                    </div>
+                    <div class="panel-body">
+                        <ul class="list-unstyled" data-bind="foreach: products">
+                            <li>
+                                <strong><span data-bind="text: ProductName"></span></strong>: <span data-bind="text: Title"></span>
+                                <small><a href="#" data-bind="click: $parent.GetAllProducts">Details</a></small>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="alert alert-danger" data-bind="visible: error"><p data-bind="text: error"></p></div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h2 class="panel-title">Detail</h2>
+                    </div>
+                    <table class="table">
+                        <tr><td>Product Name</td><td data-bind="text: detail().ProductName"></td></tr>
+                        <tr><td>Product Title</td><td data-bind="text: detail().ProductName"></td></tr>
+                        <tr><td>Price</td><td data-bind="text: detail().ProductName"></td></tr>
+                        <tr><td>Genre</td><td data-bind="text: detail().ProductName"></td></tr>
+                        <tr><td>Price</td><td data-bind="text: detail().Price"></td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+        <div class="container body-content">
+            <hr />
+            <footer>
+                <p>WiNiBro</p>
+            </footer>
+        </div>
+        <script src="https://code.jquery.com/jquery.min.js"></script>
+        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+        <script src="~/Content/Stationery/js/owl.carousel.min.js"></script>
+        <script src="~/Content/Stationery/js/jquery.sticky.js"></script>
+        <script src=" ~/Content/Stationery/js/jquery.easing.1.3.min.js"></script>
+        <script src=" ~/Content/Stationery/js/main.js"></script>
+    
+    
+</body>
+</html>
